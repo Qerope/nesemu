@@ -1,0 +1,4 @@
+nesemu
+*.o
+*.nes
+trace.log
