@@ -16,6 +16,8 @@ int main(int argc, char **argv) {
         return 1;
     Bus bus;
     bus.cart = &cart;
+    Cpu cpu(&bus);
+    cpu.reset();
     (void)nestest;
     return 0;
 }
