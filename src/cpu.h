@@ -16,5 +16,6 @@ struct Cpu {
 
 private:
     uint16_t read16(uint16_t addr);
+    uint16_t operand_addr(int mode);
     void set_zn(uint8_t v);
 };
