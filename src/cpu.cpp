@@ -53,4 +53,19 @@ uint16_t Cpu::operand_addr(int mode) {
 int Cpu::step() {
     uint8_t op = bus->read(pc++);
     int cc = op & 3, bbb = (op >> 2) & 7, aaa = op >> 5;
+    case 0xAA: x = a; set_zn(x); return 0;
+    case 0xA8: y = a; set_zn(y); return 0;
+    case 0x8A: a = x; set_zn(a); return 0;
+    case 0x98: a = y; set_zn(a); return 0;
+    case 0xBA: x = sp; set_zn(x); return 0;
+    case 0x9A: sp = x; return 0;
+
+    if (cc == 1) {
+        static const int modes[8] = {IZX, ZP, IMM, ABS, IZY, ZPX, ABY, ABX};
+        int mode = modes[bbb];
+        uint16_t addr = operand_addr(mode);
+        uint8_t m = bus->read(addr);
+        case 4: bus->write(addr, a); break;
+        case 5: a = m; set_zn(a); break;
+    return 0;
 }
