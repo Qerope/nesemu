@@ -50,6 +50,19 @@ uint16_t Cpu::operand_addr(int mode) {
     return 0;
 }
 
+void Cpu::adc(uint8_t m) {
+    unsigned sum = a + m + (p & C);
+    bool v = (a ^ sum) & 0x80;
+    p = (p & ~(C | V)) | (sum > 0xFF ? C : 0) | (v ? V : 0);
+    a = sum;
+    set_zn(a);
+}
+
+void Cpu::compare(uint8_t reg, uint8_t m) {
+    p = (p & ~C) | (reg >= m ? C : 0);
+    set_zn(reg - m);
+}
+
 int Cpu::step() {
     uint8_t op = bus->read(pc++);
     int cc = op & 3, bbb = (op >> 2) & 7, aaa = op >> 5;
@@ -65,7 +78,17 @@ int Cpu::step() {
         int mode = modes[bbb];
         uint16_t addr = operand_addr(mode);
         uint8_t m = bus->read(addr);
+        switch (aaa) {
+        case 0: a |= m; set_zn(a); break;
+        case 1: a &= m; set_zn(a); break;
+        case 2: a ^= m; set_zn(a); break;
+        case 3: adc(m); break;
         case 4: bus->write(addr, a); break;
         case 5: a = m; set_zn(a); break;
+        case 6: compare(a, m); break;
+        case 7: adc(~m); break;
+        }
+        return 0;
+    }
     return 0;
 }
