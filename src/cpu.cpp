@@ -50,6 +50,14 @@ uint16_t Cpu::operand_addr(int mode) {
     return 0;
 }
 
+void Cpu::push(uint8_t v) {
+    bus->write(0x100 + sp--, v);
+}
+
+uint8_t Cpu::pop() {
+    return bus->read(0x100 + ++sp);
+}
+
 void Cpu::adc(uint8_t m) {
     unsigned sum = a + m + (p & C);
     bool v = (a ^ sum) & 0x80;
@@ -91,6 +99,10 @@ int Cpu::step() {
         pc |= pop() << 8;
         pc++;
         return 0;
+    case 0x48: push(a); return 0;
+    case 0x68: a = pop(); set_zn(a); return 0;
+    case 0x08: push(p); return 0;
+    case 0x28: p = pop(); return 0;
     case 0xAA: x = a; set_zn(x); return 0;
     case 0xA8: y = a; set_zn(y); return 0;
     case 0x8A: a = x; set_zn(a); return 0;

@@ -18,6 +18,8 @@ private:
     uint16_t read16(uint16_t addr);
     uint16_t operand_addr(int mode);
     void set_zn(uint8_t v);
+    void push(uint8_t v);
+    uint8_t pop();
     void adc(uint8_t m);
     void compare(uint8_t reg, uint8_t m);
 };
