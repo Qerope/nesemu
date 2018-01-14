@@ -109,6 +109,18 @@ int Cpu::step() {
     case 0x98: a = y; set_zn(a); return 0;
     case 0xBA: x = sp; set_zn(x); return 0;
     case 0x9A: sp = x; return 0;
+    case 0xE8: x++; set_zn(x); return 0;
+    case 0xCA: x--; set_zn(x); return 0;
+    case 0xC8: y++; set_zn(y); return 0;
+    case 0x88: y--; set_zn(y); return 0;
+    case 0x18: p &= ~C; return 0;
+    case 0x38: p |= C; return 0;
+    case 0x58: p &= ~I; return 0;
+    case 0x78: p |= I; return 0;
+    case 0xB8: p &= ~V; return 0;
+    case 0xD8: p &= ~D; return 0;
+    case 0xF8: p |= D; return 0;
+    case 0xEA: return 0;
     }
 
     if (cc == 1) {
@@ -125,6 +137,56 @@ int Cpu::step() {
         case 5: a = m; set_zn(a); break;
         case 6: compare(a, m); break;
         case 7: adc(~m); break;
+        }
+        return 0;
+    }
+
+    if (cc == 2) {
+        static const int modes[8] = {IMM, ZP, ACC, ABS, 0, ZPX, 0, ABX};
+        int mode = modes[bbb];
+        // STX/LDX index with Y instead of X
+        if ((aaa == 4 || aaa == 5) && mode == ZPX) mode = ZPY;
+        if (aaa == 5 && mode == ABX) mode = ABY;
+        if (mode == ACC) {
+            uint8_t &r = a;
+            uint8_t c = p & C;
+            switch (aaa) {
+            case 0: p = (p & ~C) | (r >> 7); r <<= 1; break;
+            case 1: p = (p & ~C) | (r >> 7); r = (r << 1) | c; break;
+            case 2: p = (p & ~C) | (r & 1); r >>= 1; break;
+            case 3: p = (p & ~C) | (r & 1); r = (r >> 1) | (c << 7); break;
+            }
+            set_zn(r);
+            return 0;
+        }
+        uint16_t addr = operand_addr(mode);
+        uint8_t m = bus->read(addr);
+        uint8_t c = p & C;
+        switch (aaa) {
+        case 0: p = (p & ~C) | (m >> 7); m <<= 1; break;
+        case 1: p = (p & ~C) | (m >> 7); m = (m << 1) | c; break;
+        case 2: p = (p & ~C) | (m & 1); m >>= 1; break;
+        case 3: p = (p & ~C) | (m & 1); m = (m >> 1) | (c << 7); break;
+        case 4: bus->write(addr, x); return 0;
+        case 5: x = m; set_zn(x); return 0;
+        case 6: m--; break;
+        case 7: m++; break;
+        }
+        bus->write(addr, m);
+        set_zn(m);
+        return 0;
+    }
+
+    if (cc == 0) {
+        static const int modes[8] = {IMM, ZP, 0, ABS, 0, ZPX, 0, ABX};
+        uint16_t addr = operand_addr(modes[bbb]);
+        uint8_t m = bus->read(addr);
+        switch (aaa) {
+        case 1: p = (p & ~(Z | N | V)) | ((a & m) == 0 ? Z : 0) | (m & (N | V)); break;
+        case 4: bus->write(addr, y); break;
+        case 5: y = m; set_zn(y); break;
+        case 6: compare(y, m); break;
+        case 7: compare(x, m); break;
         }
         return 0;
     }
