@@ -60,7 +60,7 @@ uint8_t Cpu::pop() {
 
 void Cpu::adc(uint8_t m) {
     unsigned sum = a + m + (p & C);
-    bool v = (a ^ sum) & 0x80;
+    bool v = (~(a ^ m) & (a ^ sum) & 0x80) != 0;
     p = (p & ~(C | V)) | (sum > 0xFF ? C : 0) | (v ? V : 0);
     a = sum;
     set_zn(a);
