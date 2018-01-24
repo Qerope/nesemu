@@ -136,7 +136,7 @@ int Cpu::step() {
         case 4: bus->write(addr, a); break;
         case 5: a = m; set_zn(a); break;
         case 6: compare(a, m); break;
-        case 7: adc(~m); break;
+        case 7: adc(m ^ 0xFF); break;
         }
         return 0;
     }
