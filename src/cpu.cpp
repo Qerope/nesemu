@@ -88,7 +88,12 @@ int Cpu::step() {
 
     switch (op) {
     case 0x4C: pc = read16(pc); return 0;  // JMP abs
-    case 0x6C: pc = read16(read16(pc)); return 0;  // JMP (ind)
+    case 0x6C: {
+        uint16_t ptr = read16(pc);
+        // the 6502 does not carry into the high byte when the pointer ends in $FF
+        pc = bus->read(ptr) | bus->read((ptr & 0xFF00) | ((ptr + 1) & 0xFF)) << 8;
+        return 0;
+    }
     case 0x20:
         push((pc + 1) >> 8);
         push((pc + 1) & 0xFF);
