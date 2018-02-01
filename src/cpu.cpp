@@ -106,8 +106,8 @@ int Cpu::step() {
         return 0;
     case 0x48: push(a); return 0;
     case 0x68: a = pop(); set_zn(a); return 0;
-    case 0x08: push(p); return 0;
-    case 0x28: p = pop(); return 0;
+    case 0x08: push(p | B | U); return 0;
+    case 0x28: p = (pop() & ~B) | U; return 0;
     case 0xAA: x = a; set_zn(x); return 0;
     case 0xA8: y = a; set_zn(y); return 0;
     case 0x8A: a = x; set_zn(a); return 0;
