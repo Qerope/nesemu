@@ -104,6 +104,19 @@ int Cpu::step() {
         pc |= pop() << 8;
         pc++;
         return 0;
+    case 0x40:
+        p = (pop() & ~B) | U;
+        pc = pop();
+        pc |= pop() << 8;
+        return 0;
+    case 0x00:
+        pc++;
+        push(pc >> 8);
+        push(pc & 0xFF);
+        push(p | B | U);
+        p |= I;
+        pc = read16(0xFFFE);
+        return 0;
     case 0x48: push(a); return 0;
     case 0x68: a = pop(); set_zn(a); return 0;
     case 0x08: push(p | B | U); return 0;
