@@ -14,6 +14,7 @@ void Cpu::reset() {
     pc = read16(0xFFFC);
     sp = 0xFD;
     p = 0x24;
+    cycles = 7;
 }
 
 uint16_t Cpu::operand_addr(int mode) {
@@ -72,6 +73,7 @@ void Cpu::compare(uint8_t reg, uint8_t m) {
 }
 
 int Cpu::step() {
+    uint64_t start = cycles;
     uint8_t op = bus->read(pc++);
     int cc = op & 3, bbb = (op >> 2) & 7, aaa = op >> 5;
 
@@ -83,6 +85,7 @@ int Cpu::step() {
         bool flag = (p & mask[op >> 6]) != 0;
         if (flag == want)
             pc += off;
+        cycles += 2;
         return 0;
     }
 
@@ -208,5 +211,8 @@ int Cpu::step() {
         }
         return 0;
     }
+
+    cycles += 2;
+    return (int)(cycles - start);
     return 0;
 }

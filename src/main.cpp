@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
     }
     for (int i = 0; i < 9000; i++) {
         printf("%04X A:%02X X:%02X Y:%02X P:%02X SP:%02X", cpu.pc, cpu.a, cpu.x, cpu.y, cpu.p, cpu.sp);
+        printf(" CYC:%llu", (unsigned long long)cpu.cycles);
         printf("\n");
         cpu.step();
     }

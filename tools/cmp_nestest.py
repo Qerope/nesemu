@@ -10,7 +10,7 @@ def fields(line):
 mine, ref = open(sys.argv[1]), open(sys.argv[2])
 for n, (a, b) in enumerate(zip(mine, ref), 1):
     fa, fb = fields(a), fields(b)
-    if fa[:6] != fb[:6]:
+    if fa[:6] != fb[:6] or (fa[6] and fa[6] != fb[6]):
         print('line %d differs\n  mine: %s  ref:  %s' % (n, a, b))
         sys.exit(1)
 print('ok')
