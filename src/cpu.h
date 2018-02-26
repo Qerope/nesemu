@@ -10,6 +10,7 @@ struct Cpu {
     uint16_t pc = 0;
     uint64_t cycles = 0;
     Bus *bus;
+    bool crossed = false;
 
     explicit Cpu(Bus *b) : bus(b) {}
     void reset();

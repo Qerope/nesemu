@@ -31,11 +31,13 @@ uint16_t Cpu::operand_addr(int mode) {
     case ABX: {
         uint16_t a = read16(pc);
         pc += 2;
+        crossed = (a & 0xFF00) != ((a + x) & 0xFF00);
         return a + x;
     }
     case ABY: {
         uint16_t a = read16(pc);
         pc += 2;
+        crossed = (a & 0xFF00) != ((a + y) & 0xFF00);
         return a + y;
     }
     case IZX: {
@@ -45,6 +47,7 @@ uint16_t Cpu::operand_addr(int mode) {
     case IZY: {
         uint8_t z = bus->read(pc++);
         uint16_t a = bus->read(z) | bus->read((uint8_t)(z + 1)) << 8;
+        crossed = (a & 0xFF00) != ((a + y) & 0xFF00);
         return a + y;
     }
     }
@@ -74,6 +77,7 @@ void Cpu::compare(uint8_t reg, uint8_t m) {
 
 int Cpu::step() {
     uint64_t start = cycles;
+    crossed = false;
     uint8_t op = bus->read(pc++);
     int cc = op & 3, bbb = (op >> 2) & 7, aaa = op >> 5;
 
